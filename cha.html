@@ -1237,7 +1237,7 @@
       PUZZLE_ROWS: 3,
       PUZZLE_COLS: 4,
       PUZZLE_SIZE: 400,
-      SECRET_MESSAGE: 'Forever YoursI chose these flowers because I felt like they were the kind you would love, and while I may not know your exact favorites yet, each one made me think of you in its own way. Maybe it’s their beauty, their uniqueness, or the way they quietly brighten everything around them, but they reminded me of the little things I admire about you 💕',
+      SECRET_MESSAGE: 'Forever YoursI chose these flowers because I felt like they were the kind you would love, and while I may not know your exact favorites yet, each one made me think of you in its own way. Maybe it's their beauty, their uniqueness, or the way they quietly brighten everything around them, but they reminded me of the little things I admire about you 💕',
       SNAP_DISTANCE: 50
     };
 
@@ -1558,7 +1558,17 @@
       playHeartSound();
 
       if (state.heartClickCount === 20) {
-        document.getElementById('secretMessage').style.display = 'block';
+        // Trigger explosive confetti burst
+        createExplosiveConfetti(event);
+        
+        // Show secret message after a delay
+        setTimeout(() => {
+          document.getElementById('secretMessage').style.display = 'block';
+          // Auto-scroll to secret message
+          setTimeout(() => {
+            document.getElementById('secretMessage').scrollIntoView({ behavior: 'smooth' });
+          }, 300);
+        }, 800);
       }
     }
 
@@ -1581,17 +1591,52 @@
       }
     }
 
-    function animateConfetti(el, x, y, vx, vy) {
+    function createExplosiveConfetti(event) {
+      const emoji = ['❤️', '😘', '😍', '💕', '💖', '✨', '🎉', '🎊', '⭐', '💫'];
+      const rect = event.target.getBoundingClientRect();
+      const centerX = rect.left + rect.width / 2;
+      const centerY = rect.top + rect.height / 2;
+      
+      // Create more confetti pieces for explosive effect
+      for (let i = 0; i < 60; i++) {
+        const el = document.createElement('div');
+        el.className = 'confetti';
+        el.textContent = emoji[Math.floor(Math.random() * emoji.length)];
+        el.style.left = centerX + 'px';
+        el.style.top = centerY + 'px';
+        el.style.fontSize = (20 + Math.random() * 30) + 'px';
+        document.body.appendChild(el);
+        
+        // Random angles for explosion effect
+        const angle = Math.random() * Math.PI * 2;
+        const speed = 5 + Math.random() * 10;
+        const vx = Math.cos(angle) * speed;
+        const vy = Math.sin(angle) * speed - 3;
+        
+        animateConfetti(el, centerX, centerY, vx, vy, 400);
+      }
+    }
+
+    function animateConfetti(el, x, y, vx, vy, duration = 300) {
       let xx = x, yy = y;
+      const startTime = Date.now();
+      const maxDuration = duration || 300;
+      
       const animate = () => {
-        xx += vx;
-        yy += vy;
-        vy += 0.1;
-        el.style.left = xx + 'px';
-        el.style.top = yy + 'px';
-        el.style.opacity = 1 - (yy - y) / 300;
-        if (yy - y < 300) requestAnimationFrame(animate);
-        else el.remove();
+        const elapsed = Date.now() - startTime;
+        const progress = elapsed / maxDuration;
+        
+        if (progress < 1) {
+          xx += vx;
+          yy += vy;
+          vy += 0.1;
+          el.style.left = xx + 'px';
+          el.style.top = yy + 'px';
+          el.style.opacity = 1 - progress;
+          requestAnimationFrame(animate);
+        } else {
+          el.remove();
+        }
       };
       animate();
     }
