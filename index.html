@@ -425,10 +425,25 @@
     /* PUZZLE STYLES */
     .puzzle-wrapper {
       display: flex;
-      flex-direction: column;
-      align-items: center;
+      flex-direction: row;
+      align-items: flex-start;
       gap: 30px;
       margin-top: 30px;
+      justify-content: center;
+    }
+
+    .puzzle-left {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 15px;
+    }
+
+    .puzzle-right {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 15px;
     }
 
     .puzzle-canvas {
@@ -450,15 +465,16 @@
       color: #666;
       border-left: 4px solid #ff4081;
       max-width: 500px;
-      margin-top: 20px;
+      margin-top: 0;
+      text-align: center;
     }
 
     .puzzle-pieces-label {
       font-size: 14px;
       color: #d81b60;
       font-weight: 600;
-      margin-top: 30px;
       margin-bottom: 15px;
+      text-align: center;
     }
 
     .puzzle-pieces-container {
@@ -471,7 +487,7 @@
       border: 2px dashed rgba(255, 64, 129, 0.2);
       border-radius: 12px;
       padding: 20px;
-      max-width: 500px;
+      width: 400px;
     }
 
     .puzzle-piece {
@@ -567,7 +583,7 @@
       font-size: 14px;
       color: #d81b60;
       font-weight: 600;
-      margin-top: 15px;
+      text-align: center;
     }
 
     /* Photo Gallery Styles */
@@ -824,6 +840,17 @@
       font-style: italic;
     }
 
+    @media (max-width: 900px) {
+      .puzzle-wrapper {
+        flex-direction: column;
+        align-items: center;
+      }
+
+      .puzzle-pieces-container {
+        width: 100%;
+      }
+    }
+
     @media (max-width: 600px) {
       .container {
         padding: 30px 20px;
@@ -921,6 +948,11 @@
       .secret-letter {
         font-size: 40px;
         letter-spacing: 6px;
+      }
+
+      .puzzle-pieces-container {
+        width: 100%;
+        max-width: 300px;
       }
     }
 
@@ -1044,15 +1076,19 @@
       <p class="subtitle">Drag the puzzle pieces to complete my picture and unlock a secret message!</p>
       
       <div class="puzzle-instructions">
-        💝 Drag each puzzle piece into the white box. Position them perfectly to complete the picture!
+        💝 Drag each puzzle piece into the white box on the left. Position them perfectly to complete the picture!
       </div>
 
       <div class="puzzle-wrapper">
-        <div class="puzzle-canvas" id="puzzleCanvas"></div>
-        <div class="progress-indicator">Pieces placed: <span id="puzzleProgress">0</span>/12</div>
+        <div class="puzzle-left">
+          <div class="puzzle-canvas" id="puzzleCanvas"></div>
+          <div class="progress-indicator">Pieces placed: <span id="puzzleProgress">0</span>/12</div>
+        </div>
 
-        <div class="puzzle-pieces-label">Available Pieces:</div>
-        <div class="puzzle-pieces-container" id="puzzlePiecesContainer"></div>
+        <div class="puzzle-right">
+          <div class="puzzle-pieces-label">Available Pieces:</div>
+          <div class="puzzle-pieces-container" id="puzzlePiecesContainer"></div>
+        </div>
       </div>
 
       <div class="puzzle-success-message" id="puzzleSuccess">
