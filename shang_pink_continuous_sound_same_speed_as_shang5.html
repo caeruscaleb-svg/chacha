@@ -1528,13 +1528,18 @@
       <h2>🎵 Songs That Remind Me of You 🎵</h2>
       <p class="subtitle">A few songs I chose because I thought you might like them.</p>
       
-      <div class="songs-container">
+         <div class="songs-container">
         <div class="song-card">
           <div style="font-size: 30px; margin-bottom: 10px;">🎶</div>
           <div class="song-title">Fix You</div>
           <div class="song-artist">Coldplay</div>
           <div class="song-reason">No matter how lost you feel, there is still a way back to yourself.</div>
           <div class="song-note">💭 "Lights will guide you home"</div>
+          <button onclick="playSong('fixyou')">▶ Play Song</button>
+
+<audio id="fixyou" controls loop>
+  <source src="@coldplay - Fix You (Lyrics).mp3" type="audio/mpeg">
+</audio>
         </div>
         <div class="song-card">
           <div style="font-size: 30px; margin-bottom: 10px;">🎶</div>
@@ -1542,6 +1547,11 @@
           <div class="song-artist">Ben and Ben </div>
           <div class="song-reason">Having the courage to continue is already a victory.</div>
           <div class="song-note">💭 "In the end, keep carrying on with courage"</div>
+<button onclick="playSong('courage')">▶ Play Song</button>
+
+<audio id="fixyou" controls loop>
+  <source src="Ben&Ben - Courage  Official Lyric Video.mp3" type="audio/mpeg">
+</audio>
         </div>
         <div class="song-card">
           <div style="font-size: 30px; margin-bottom: 10px;">🎶</div>
@@ -1549,6 +1559,11 @@
           <div class="song-artist">Yaeow</div>
           <div class="song-reason">You should never feel ashamed of the things you had to overcome.</div>
           <div class="song-note">💭 "Hey you, you should know that I'm proud"</div>
+          <button onclick="playSong('notyourfault')">▶ Play Song</button>
+
+<audio id="fixyou" controls loop>
+  <source src="yaeow - not your fault (hey you) (Official Lyric Video).mp3" type="audio/mpeg">
+</audio>
         </div>
         <div class="song-card">
           <div style="font-size: 30px; margin-bottom: 10px;">🎶</div>
@@ -1556,6 +1571,11 @@
           <div class="song-artist">Sean Sapanila</div>
           <div class="song-reason">Even in the hardest seasons, something beautiful can still grow from within you.</div>
           <div class="song-note">💭 "Tanggapin mo ang iyong sarili, kahit na ga'no pa kalalim ang lubak"</div>
+              <button onclick="playSong('pag-asa')">▶ Play Song</button>
+
+<audio id="fixyou" controls loop>
+  <source src="PAG-ASA (Lyric Video)  Sean Sapanila ft. Gerry Calzado.mp3" type="audio/mpeg">
+</audio>
         </div>
         <div class="song-card">
           <div style="font-size: 30px; margin-bottom: 10px;">🎶</div>
@@ -1563,6 +1583,11 @@
           <div class="song-artist">Arthur Miguek</div>
           <div class="song-reason">You don't have to blame yourself for the things you never deserved to carry.</div>
           <div class="song-note">💭 "Dahil minsan ayoko na rin mabuhay, kung paulit‑ulit kang mamamatay"</div>
+              <button onclick="playSong('sindi')">▶ Play Song</button>
+
+<audio id="fixyou" controls loop>
+  <source src="Arthur Miguel - Sindi (Official Lyric Visualizer).mp3" type="audio/mpeg">
+</audio>
         </div>
         <div class="song-card">
           <div style="font-size: 30px; margin-bottom: 10px;">🎶</div>
@@ -1570,6 +1595,11 @@
           <div class="song-artist">Renard Bugash</div>
           <div class="song-reason">Asking for help doesn't make you weak. You are allowed to need someone too.</div>
           <div class="song-note">💭 "Di na kailangan pang itago, ang mga luha sa iyong mata"</div>
+              <button onclick="playSong('notyourfault')">▶ Play Song</button>
+
+<audio id="fixyou" controls loop>
+  <source src="yaeow - not your fault (hey you) (Official Lyric Video).mp3" type="audio/mpeg">
+</audio>
         </div>
       </div>
 
@@ -1622,6 +1652,19 @@
       neighbors: 2
     };
 
+    function playSong(id) {
+  const song = document.getElementById(id);
+
+  document.querySelectorAll('audio').forEach(audio => {
+    if (audio !== song) {
+      audio.pause();
+      audio.currentTime = 0;
+    }
+  });
+
+  song.play();
+}
+    
     let state = {
       heartClickCount: 0,
       isAudioPlaying: false,
