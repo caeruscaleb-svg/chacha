@@ -1,0 +1,612 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Babi Bau</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #ffd1dc 0%, #f7b6c8 50%, #ee8fab 100%);
+      min-height: 100vh;
+      padding: 20px;
+      overflow-x: hidden;
+    }
+
+    #chatSection {
+      display: none;
+    }
+
+    #chatSection.active {
+      display: block;
+    }
+
+    .chat-container {
+      background: rgba(255, 255, 255, 0.95);
+      border-radius: 30px;
+      box-shadow: 0 20px 60px rgba(158, 47, 80, 0.2);
+      padding: 30px;
+      max-width: 600px;
+      margin: 0 auto;
+      height: 70vh;
+      display: flex;
+      flex-direction: column;
+      backdrop-filter: blur(10px);
+      border: 2px solid rgba(217, 79, 112, 0.1);
+    }
+
+    .chat-header {
+      font-size: 24px;
+      color: #9e2f50;
+      font-weight: 600;
+      margin-bottom: 20px;
+      text-align: center;
+    }
+
+    .chat-messages {
+      flex: 1;
+      overflow-y: auto;
+      margin-bottom: 20px;
+      padding-right: 10px;
+    }
+
+    .chat-messages::-webkit-scrollbar {
+      width: 8px;
+    }
+
+    .chat-messages::-webkit-scrollbar-track {
+      background: rgba(217, 79, 112, 0.1);
+      border-radius: 10px;
+    }
+
+    .chat-messages::-webkit-scrollbar-thumb {
+      background: rgba(217, 79, 112, 0.3);
+      border-radius: 10px;
+    }
+
+    .message {
+      margin-bottom: 15px;
+      animation: slideIn 0.3s ease-out;
+    }
+
+    .user-message {
+      text-align: right;
+    }
+
+    .user-message .message-bubble {
+      background: linear-gradient(135deg, #d94f70 0%, #9e2f50 100%);
+      color: white;
+      display: inline-block;
+      padding: 12px 16px;
+      border-radius: 18px;
+      max-width: 80%;
+      word-wrap: break-word;
+    }
+
+    .bot-message .message-bubble {
+      background: rgba(217, 79, 112, 0.1);
+      color: #333;
+      display: inline-block;
+      padding: 12px 16px;
+      border-radius: 18px;
+      border-left: 4px solid #d94f70;
+      max-width: 80%;
+      word-wrap: break-word;
+    }
+
+    @keyframes slideIn {
+      from {
+        opacity: 0;
+        transform: translateY(10px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .chat-input-group {
+      display: flex;
+      gap: 10px;
+    }
+
+    #userInput {
+      flex: 1;
+      padding: 12px 16px;
+      border: 2px solid rgba(217, 79, 112, 0.3);
+      border-radius: 20px;
+      font-size: 14px;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      transition: all 0.3s ease;
+    }
+
+    #userInput:focus {
+      outline: none;
+      border-color: #d94f70;
+      box-shadow: 0 0 10px rgba(217, 79, 112, 0.3);
+    }
+
+    .send-btn {
+      padding: 12px 20px;
+      background: linear-gradient(135deg, #d94f70 0%, #9e2f50 100%);
+      color: white;
+      border: none;
+      border-radius: 20px;
+      cursor: pointer;
+      font-weight: 600;
+      transition: all 0.3s ease;
+      box-shadow: 0 5px 15px rgba(158, 47, 80, 0.3);
+    }
+
+    .send-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 20px rgba(158, 47, 80, 0.4);
+    }
+
+    .send-btn:active {
+      transform: translateY(0);
+    }
+
+    /* Rest of original styles... */
+    .music-player {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      z-index: 9000;
+      background: linear-gradient(135deg, #d94f70 0%, #9e2f50 100%);
+      border: none;
+      color: white;
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      cursor: pointer;
+      font-size: 24px;
+      box-shadow: 0 5px 15px rgba(158, 47, 80, 0.3);
+      transition: all 0.3s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .music-player:hover {
+      transform: scale(1.1);
+      box-shadow: 0 8px 20px rgba(158, 47, 80, 0.4);
+    }
+
+    .music-player.playing {
+      animation: pulse-music 1.5s ease-in-out infinite;
+    }
+
+    @keyframes pulse-music {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.15); }
+    }
+
+    .music-player-tooltip {
+      position: absolute;
+      bottom: -40px;
+      right: 0;
+      background: rgba(0, 0, 0, 0.8);
+      color: white;
+      padding: 8px 12px;
+      border-radius: 8px;
+      font-size: 12px;
+      white-space: nowrap;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s ease;
+    }
+
+    .music-player:hover .music-player-tooltip {
+      opacity: 1;
+    }
+
+    .scroll-to-top {
+      position: fixed;
+      bottom: 30px;
+      right: 30px;
+      background: linear-gradient(135deg, #d94f70 0%, #9e2f50 100%);
+      color: white;
+      border: none;
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      cursor: pointer;
+      font-size: 24px;
+      box-shadow: 0 5px 15px rgba(158, 47, 80, 0.3);
+      transition: all 0.3s ease;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 8999;
+    }
+
+    .scroll-to-top.show {
+      display: flex;
+    }
+
+    .scroll-to-top:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 8px 20px rgba(158, 47, 80, 0.4);
+    }
+
+    .nav-tabs {
+      display: flex;
+      gap: 10px;
+      justify-content: center;
+      margin-bottom: 30px;
+      flex-wrap: wrap;
+    }
+
+    .nav-button {
+      padding: 12px 24px;
+      background: linear-gradient(135deg, #d94f70 0%, #9e2f50 100%);
+      color: white;
+      border: none;
+      border-radius: 25px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      box-shadow: 0 5px 15px rgba(158, 47, 80, 0.3);
+    }
+
+    .nav-button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 20px rgba(158, 47, 80, 0.4);
+    }
+
+    .nav-button.active {
+      background: linear-gradient(135deg, #9e2f50 0%, #731f3b 100%);
+    }
+
+    .section {
+      display: none;
+    }
+
+    .section.active {
+      display: block;
+    }
+
+    .container {
+      background: rgba(255, 255, 255, 0.95);
+      border-radius: 30px;
+      box-shadow: 0 20px 60px rgba(158, 47, 80, 0.2);
+      padding: 50px 40px;
+      max-width: 900px;
+      margin: 0 auto;
+      text-align: center;
+      backdrop-filter: blur(10px);
+      border: 2px solid rgba(217, 79, 112, 0.1);
+    }
+
+    h1 {
+      font-size: 32px;
+      color: #9e2f50;
+      margin-bottom: 15px;
+      font-weight: 600;
+      letter-spacing: 1px;
+    }
+
+    h2 {
+      font-size: 28px;
+      color: #9e2f50;
+      margin-bottom: 30px;
+      font-weight: 600;
+    }
+
+    .subtitle {
+      font-size: 16px;
+      color: #666;
+      margin-bottom: 40px;
+      font-weight: 300;
+      line-height: 1.6;
+    }
+  </style>
+</head>
+<body>
+  <div class="nav-tabs">
+    <button class="nav-button active" onclick="showSection('home')">Home</button>
+    <button class="nav-button" onclick="showSection('messages')">Messages</button>
+  </div>
+
+  <!-- Home Section -->
+  <div id="home" class="section active">
+    <div class="container">
+      <h1>Hi Babi! 💗</h1>
+      <p class="subtitle">Welcome to our special corner. Click "Messages" to chat with me!</p>
+    </div>
+  </div>
+
+  <!-- Chat Section -->
+  <div id="messages" class="section">
+    <div class="chat-container">
+      <div class="chat-header">Let's Talk 💕</div>
+      <div class="chat-messages" id="chatMessages"></div>
+      <div class="chat-input-group">
+        <input 
+          type="text" 
+          id="userInput" 
+          placeholder="Tell me something..." 
+          onkeypress="handleKeyPress(event)"
+        />
+        <button class="send-btn" onclick="sendMessage()">Send</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Contextual response system - matches user input to personalized responses
+    const responsePatterns = [
+      {
+        keywords: ['love', 'like', 'care', 'adore'],
+        responses: [
+          "You know what? I love you too. So much. 💗",
+          "That feeling is mutual, babe. Always.",
+          "Hearing you say that makes my heart so happy. 💕",
+          "Me too, more than you know. Every single day.",
+          "You're my favorite person to love. ❤️"
+        ]
+      },
+      {
+        keywords: ['miss', 'miss you', 'miss you so'],
+        responses: [
+          "I miss you too. Every moment away from you feels long. 💔",
+          "Same here. Can't wait to see you again.",
+          "Miss you more, honestly. When can I see you?",
+          "You're always on my mind, even when we're apart. 😔",
+          "Missing you is like my full-time job right now. 😩"
+        ]
+      },
+      {
+        keywords: ['hello', 'hi', 'hey', 'what\'s up'],
+        responses: [
+          "Hey! So happy you're here. What's on your mind?",
+          "Hi babe! How are you? Tell me everything. 😊",
+          "Hey! Just thinking about you, actually. 💗",
+          "Hi there! You made my day better just by saying hi.",
+          "Hey beautiful! What can I do for you?"
+        ]
+      },
+      {
+        keywords: ['how are you', 'how\'re you', 'how are'],
+        responses: [
+          "I'm doing amazing now that you're here. How are you?",
+          "Better now that I'm talking to you, honestly. 💕",
+          "I'm good! Really good. Thanks for asking, babe.",
+          "Can't complain when you're around. How are YOU though?",
+          "Honestly? I'm really happy talking to you right now."
+        ]
+      },
+      {
+        keywords: ['thank you', 'thanks', 'thank u', 'gracias', 'salamat'],
+        responses: [
+          "You don't need to thank me. That's what I'm here for. 💗",
+          "Anytime, babe. Anything for you.",
+          "Of course! Always happy to help you.",
+          "That's what people who love each other do. 😊",
+          "No need to say thanks. I'd do anything for you."
+        ]
+      },
+      {
+        keywords: ['sorry', 'apologize', 'i\'m sorry', 'my bad', 'forgive me'],
+        responses: [
+          "Hey, we're good. I already forgave you. 💕",
+          "There's nothing to apologize for. We're okay.",
+          "Come on, you know I could never stay mad at you.",
+          "Water under the bridge, babe. Always.",
+          "I love you too much to ever hold anything against you."
+        ]
+      },
+      {
+        keywords: ['happy', 'excited', 'great', 'amazing', 'awesome'],
+        responses: [
+          "That makes ME happy just hearing about it! 😄",
+          "Yesss! I love your energy right now!",
+          "Tell me more! I want to hear everything!",
+          "Your happiness is contagious. I'm smiling too! 😊",
+          "This is the energy I needed today. Love it!"
+        ]
+      },
+      {
+        keywords: ['sad', 'down', 'upset', 'hurt', 'bad day'],
+        responses: [
+          "Hey, I'm here for you. Tell me what's wrong. 💙",
+          "Don't be sad, babe. Let me help if I can.",
+          "I hate seeing you like this. What happened?",
+          "You know I'm always here to listen. Talk to me.",
+          "Whatever it is, we can get through it together. 💕"
+        ]
+      },
+      {
+        keywords: ['night', 'sleep', 'goodnight', 'good night', 'sweet dreams'],
+        responses: [
+          "Sleep well, beautiful. Dream of me! 😴💗",
+          "Goodnight, babe. Sweet dreams ahead. 🌙",
+          "Rest well! Can't wait to talk to you tomorrow.",
+          "Sleep tight! You're the last thing on my mind. 💕",
+          "Night! May your dreams be as sweet as you are. ✨"
+        ]
+      },
+      {
+        keywords: ['morning', 'good morning', 'morning babe', 'morning love'],
+        responses: [
+          "Good morning, beautiful! Ready to make today amazing?",
+          "Morning! You're the first thing on my mind. 💕",
+          "Hey gorgeous! How'd you sleep?",
+          "Good morning, love! Another day with you is a blessing.",
+          "Rise and shine! Let's make today count. 😊"
+        ]
+      },
+      {
+        keywords: ['meal', 'eat', 'hungry', 'food', 'lunch', 'dinner', 'breakfast'],
+        responses: [
+          "Haha you're so cute when you're hungry. Go grab something! 🍽️",
+          "Feed yourself, silly! Can't have my babe going hungry.",
+          "Go eat something yummy. I'll still be here. 😄",
+          "Aww, hungry? You're adorable. Go fuel up!",
+          "Never skip meals! Take care of yourself, okay? 💕"
+        ]
+      },
+      {
+        keywords: ['busy', 'working', 'work', 'tired', 'exhausted'],
+        responses: [
+          "Go handle your business, babe. I'll be here when you're done. 💪",
+          "You got this! Go crush it! 🔥",
+          "Take your time. Rest when you need to. We have all the time.",
+          "I'm proud of you for working so hard. Keep going!",
+          "Don't stress too much, okay? I'm proud of you no matter what."
+        ]
+      },
+      {
+        keywords: ['jealous', 'jelly', 'envious'],
+        responses: [
+          "Aww, you're cute when you're jealous. 😊 But you know it's only you.",
+          "Come on, you know there's no one else like you. Don't worry.",
+          "You have absolutely nothing to worry about, babe. Trust me.",
+          "Why would I look anywhere else? You're everything I want.",
+          "You're my one and only. That's it. No one else matters."
+        ]
+      },
+      {
+        keywords: ['phone', 'message', 'text', 'call', 'facetime', 'video'],
+        responses: [
+          "I love getting messages from you. It always makes my day. 📱",
+          "You can reach out to me anytime, anywhere, okay?",
+          "I'm always just a message away from you, babe. 💕",
+          "Every notification from you makes me smile. 😊",
+          "You never have to wait for a reply from me. Ever."
+        ]
+      },
+      {
+        keywords: ['future', 'together', 'forever', 'tomorrow', 'next year'],
+        responses: [
+          "I'm excited about our future, babe. You and me. Always.",
+          "Forever sounds about right for us. 💕",
+          "I can't wait to see what the future holds for us.",
+          "As long as you're by my side, I'm ready for anything.",
+          "Tomorrow, next year, forever - I want it all with you."
+        ]
+      },
+      {
+        keywords: ['you\'re cute', 'you\'re beautiful', 'you\'re hot', 'you\'re perfect'],
+        responses: [
+          "Aww, you're making me blush now. 😳 But not as beautiful as you.",
+          "Right back at you, gorgeous. 💗",
+          "You're sweeter than anything. I can't even...",
+          "Says the most gorgeous person I know. 🥰",
+          "You're the real catch here, babe. Don't forget that."
+        ]
+      },
+      {
+        keywords: ['what are you doing', 'whatcha doing', 'what\'re you up to'],
+        responses: [
+          "Just thinking about you, actually. You?",
+          "Nothing important. Way more fun talking to you though. 😊",
+          "Currently: being happy that you texted. 💕",
+          "Wasn't doing much, but now my day just got better!",
+          "Just passing time until I could talk to you. 😄"
+        ]
+      },
+      {
+        keywords: ['haha', 'lol', 'hehe', 'hahaha', '😂', '😄'],
+        responses: [
+          "Your laugh is the best sound, honestly. Keep it up! 😄",
+          "I love making you laugh. It's my favorite. 💕",
+          "Haha! You're so funny and I love it.",
+          "That's the laugh I love. Don't ever stop.",
+          "You're too cute when you laugh. 🥰"
+        ]
+      }
+    ];
+
+    function getResponse(userMessage) {
+      const lowerMessage = userMessage.toLowerCase();
+      
+      // Check for pattern matches
+      for (let pattern of responsePatterns) {
+        for (let keyword of pattern.keywords) {
+          if (lowerMessage.includes(keyword)) {
+            return pattern.responses[Math.floor(Math.random() * pattern.responses.length)];
+          }
+        }
+      }
+      
+      // Fallback responses if no pattern matches
+      const fallbacks = [
+        "You always know what to say to make me smile. 💕",
+        "I like you more every single time we talk. 😊",
+        "You're special to me, you know that?",
+        "Can we talk like this forever? 💗",
+        "You make everything better, just by being you.",
+        "I'm glad you're in my life, seriously.",
+        "This is my favorite part of the day. ✨",
+        "You're worth every moment of my time. 💕",
+        "I could listen to you talk all day long.",
+        "You mean everything to me. 💕"
+      ];
+      
+      return fallbacks[Math.floor(Math.random() * fallbacks.length)];
+    }
+
+    function showSection(sectionId) {
+      // Hide all sections
+      const sections = document.querySelectorAll('.section');
+      sections.forEach(section => section.classList.remove('active'));
+      
+      // Hide all buttons' active state
+      const buttons = document.querySelectorAll('.nav-button');
+      buttons.forEach(button => button.classList.remove('active'));
+      
+      // Show selected section
+      document.getElementById(sectionId).classList.add('active');
+      event.target.classList.add('active');
+    }
+
+    function sendMessage() {
+      const input = document.getElementById('userInput');
+      const userMessage = input.value.trim();
+      
+      if (!userMessage) return;
+      
+      // Add user message
+      addMessage(userMessage, 'user');
+      input.value = '';
+      
+      // Simulate typing delay
+      setTimeout(() => {
+        const botResponse = getResponse(userMessage);
+        addMessage(botResponse, 'bot');
+      }, 500);
+    }
+
+    function addMessage(text, sender) {
+      const chatMessages = document.getElementById('chatMessages');
+      const messageDiv = document.createElement('div');
+      messageDiv.className = `message ${sender}-message`;
+      
+      const bubble = document.createElement('div');
+      bubble.className = 'message-bubble';
+      bubble.textContent = text;
+      
+      messageDiv.appendChild(bubble);
+      chatMessages.appendChild(messageDiv);
+      
+      // Scroll to bottom
+      chatMessages.scrollTop = chatMessages.scrollHeight;
+    }
+
+    function handleKeyPress(event) {
+      if (event.key === 'Enter') {
+        sendMessage();
+      }
+    }
+  </script>
+</body>
+</html>
